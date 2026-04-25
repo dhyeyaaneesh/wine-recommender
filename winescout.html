@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WineScout</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blush: #fceef3;
+  --petal: #f5d5e4;
+  --rose: #e77291;
+  --cardinal: #ac1634;
+  --burgundy: #7a002b;
+  --tyrian: #5b002c;
+  --rustic: #3e0014;
+  --raspberry: #7e2a53;
+  --pearly: #ba71a2;
+  --text-dark: #2a0010;
+  --text-mid: #6b1a40;
+}
+
+/* Chart palette — all within the wine family, NO tan/beige */
+:root {
+  --c1: #7a002b; --c2: #ac1634; --c3: #ba71a2;
+  --c4: #e77291; --c5: #7e2a53; --c6: #5b002c;
+  --c7: #3e0014; --c8: #d4537e;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--blush); color: var(--text-dark); overflow-x: hidden; }
+
+/* ── BACKGROUND ── */
+.bg-fixed { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+.blob { position: absolute; border-radius: 50%; filter: blur(55px); }
+.b1 { width: 600px; height: 600px; background: var(--pearly); opacity: 0.32; top: -150px; left: -160px; animation: bF 13s ease-in-out infinite; }
+.b2 { width: 500px; height: 500px; background: var(--rose); opacity: 0.28; bottom: -120px; right: -140px; animation: bF 10s ease-in-out infinite reverse; }
+.b3 { width: 360px; height: 360px; background: var(--cardinal); opacity: 0.22; top: 38%; left: 58%; animation: bF 16s ease-in-out infinite 3s; }
+.b4 { width: 260px; height: 260px; background: var(--raspberry); opacity: 0.25; top: 65%; left: 8%; animation: bF 12s ease-in-out infinite 5s; }
+@keyframes bF { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(28px,-18px) scale(1.06);} 66%{transform:translate(-18px,28px) scale(0.95);} }
+
+.dot-grid { background-image: radial-gradient(circle, rgba(122,0,43,0.15) 2px, transparent 2px); background-size: 34px 34px; }
+
+/* Decorative SVG vines */
+.vine { position: absolute; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 56px;
+  background: rgba(252,238,243,0.85); backdrop-filter: blur(22px);
+  border-bottom: 1.5px solid rgba(172,22,52,0.13);
+}
+.logo { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 900; font-style: italic; color: var(--burgundy); text-decoration: none; display: flex; align-items: center; gap: 10px; letter-spacing: -0.02em; }
+.logo-mark { display: inline-flex; width: 32px; height: 32px; animation: logoSpin 4s ease-in-out infinite; }
+@keyframes logoSpin { 0%,100%{transform:rotate(-6deg);} 50%{transform:rotate(7deg);} }
+.logo em { color: var(--cardinal); }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { font-size: 0.76rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-mid); text-decoration: none; font-weight: 500; position: relative; padding-bottom: 3px; transition: color 0.2s; }
+.nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 1.5px; background: var(--cardinal); transition: width 0.28s ease; }
+.nav-links a:hover { color: var(--cardinal); }
+.nav-links a:hover::after { width: 100%; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh; position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 130px 24px 110px; overflow: hidden;
+}
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(172,22,52,0.1); border: 1.5px solid rgba(172,22,52,0.22);
+  border-radius: 50px; padding: 7px 20px;
+  font-size: 0.73rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--cardinal); font-weight: 500; margin-bottom: 30px;
+  animation: fU 0.7s ease both;
+}
+.hero-title {
+  font-family: 'Playfair Display', serif; font-weight: 900;
+  font-size: clamp(3.6rem, 9.5vw, 8.5rem); line-height: 0.92;
+  letter-spacing: -0.025em; color: var(--rustic); margin-bottom: 10px;
+  animation: fU 0.7s 0.1s ease both;
+}
+.hero-title .it { font-style: italic; color: var(--cardinal); }
+.hero-title .ol { -webkit-text-stroke: 2.5px var(--burgundy); color: transparent; }
+.hero-sub {
+  font-size: 1.05rem; color: var(--text-mid); max-width: 420px;
+  line-height: 1.8; margin: 30px auto 50px; font-weight: 300;
+  animation: fU 0.7s 0.2s ease both;
+}
+.hero-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; animation: fU 0.7s 0.3s ease both; }
+@keyframes fU { from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);} }
+
+.btn-fill {
+  background: var(--burgundy); color: #fff; padding: 15px 40px;
+  border-radius: 50px; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 0.84rem;
+  letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  transition: all 0.25s; position: relative; overflow: hidden;
+}
+.btn-fill::before { content: ''; position: absolute; inset: 0; background: var(--cardinal); transform: translateX(-101%); transition: transform 0.32s ease; }
+.btn-fill:hover::before { transform: translateX(0); }
+.btn-fill > * { position: relative; z-index: 1; }
+.btn-fill:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(122,0,43,0.32); }
+
+.btn-outline {
+  border: 2px solid var(--raspberry); color: var(--raspberry);
+  padding: 13px 36px; border-radius: 50px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 0.84rem;
+  letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+  background: transparent; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px; transition: all 0.25s;
+}
+.btn-outline:hover { background: var(--raspberry); color: #fff; transform: translateY(-3px); }
+
+/* Marquee ticker */
+.ticker {
+  position: absolute; bottom: 0; width: 100%; overflow: hidden;
+  border-top: 1.5px solid rgba(172,22,52,0.14);
+  padding: 13px 0; background: rgba(252,238,243,0.65); backdrop-filter: blur(10px);
+}
+.ticker-track { display: flex; width: max-content; animation: tick 24s linear infinite; }
+.ti { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.05rem; color: var(--raspberry); padding: 0 32px; white-space: nowrap; display: flex; align-items: center; gap: 12px; }
+.ti-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cardinal); flex-shrink: 0; }
+@keyframes tick { from{transform:translateX(0);}to{transform:translateX(-50%);} }
+
+/* ── SECTIONS ── */
+.sec { position: relative; z-index: 1; padding: 90px 44px; max-width: 1160px; margin: 0 auto; scroll-margin-top: 80px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--pearly); font-weight: 500; margin-bottom: 16px; }
+.ey-bar { width: 30px; height: 1.5px; background: var(--pearly); }
+.sec-h { font-family: 'Playfair Display', serif; font-size: clamp(2.3rem, 4.8vw, 3.8rem); font-weight: 700; color: var(--rustic); line-height: 1.08; margin-bottom: 46px; }
+.sec-h em { font-style: italic; color: var(--cardinal); }
+
+.sep { display: flex; align-items: center; gap: 18px; padding: 0 44px; max-width: 1160px; margin: 0 auto; position: relative; z-index: 1; }
+.sep-line { flex: 1; height: 1.5px; background: linear-gradient(to right, transparent, rgba(172,22,52,0.18), transparent); }
+.sep-txt { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--pearly); font-size: 1.15rem; letter-spacing: 0.04em; }
+
+/* ── GLASS CARD ── */
+.glass { background: rgba(255,255,255,0.74); backdrop-filter: blur(18px); border-radius: 26px; border: 1.5px solid rgba(172,22,52,0.1); box-shadow: 0 6px 48px rgba(62,0,20,0.08), inset 0 1.5px 0 rgba(255,255,255,0.85); }
+
+/* ── RECOMMENDER ── */
+.rec-inner { padding: 46px; }
+.ctrl-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 30px; margin-bottom: 34px; }
+@media(max-width:720px){.ctrl-grid{grid-template-columns:1fr;}}
+.ctrl-lbl { display: block; font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-mid); margin-bottom: 10px; font-weight: 500; }
+.budget-num { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 900; color: var(--burgundy); line-height: 1; margin-bottom: 14px; letter-spacing: -0.02em; }
+input[type=range] { width: 100%; -webkit-appearance: none; height: 5px; background: linear-gradient(to right, var(--cardinal) 0%, var(--cardinal) var(--pct,10%), rgba(172,22,52,0.18) var(--pct,10%), rgba(172,22,52,0.18) 100%); border-radius: 5px; outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: var(--burgundy); border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 14px rgba(122,0,43,0.38); transition: transform 0.15s; }
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.18); }
+select { width: 100%; padding: 13px 44px 13px 16px; border-radius: 14px; border: 1.5px solid rgba(122,0,43,0.2); background: rgba(252,238,243,0.8); font-family: 'DM Sans', sans-serif; font-size: 0.92rem; color: var(--text-dark); appearance: none; outline: none; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 4.5L11 1' stroke='%237a002b' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+select:focus { border-color: var(--cardinal); box-shadow: 0 0 0 3px rgba(172,22,52,0.1); }
+
+.action-btn { width: 100%; padding: 18px 24px; border-radius: 16px; background: linear-gradient(130deg, var(--burgundy) 0%, var(--tyrian) 100%); color: #fff; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.25s; }
+.action-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(62,0,20,0.28); }
+.action-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+/* ── WINE CARDS ── */
+.wines-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(295px,1fr)); gap: 18px; margin-top: 34px; }
+.wcard {
+  background: linear-gradient(148deg, rgba(255,255,255,0.92) 0%, rgba(252,238,243,0.82) 100%);
+  border-radius: 22px; padding: 28px; border: 1.5px solid rgba(172,22,52,0.1);
+  box-shadow: 0 3px 22px rgba(62,0,20,0.07);
+  transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.28s;
+  animation: cP 0.5s cubic-bezier(0.34,1.56,0.64,1) both; position: relative; overflow: hidden;
+}
+.wcard::before { content: ''; position: absolute; top: 0; left: 0; width: 4.5px; height: 100%; background: linear-gradient(to bottom, var(--rose), var(--burgundy)); border-radius: 4px 0 0 4px; }
+.wcard:hover { transform: translateY(-7px) scale(1.012); box-shadow: 0 18px 44px rgba(62,0,20,0.15); }
+@keyframes cP { from{opacity:0;transform:scale(0.86) translateY(18px);}to{opacity:1;transform:scale(1) translateY(0);} }
+.wcard-rank { font-family: 'Cormorant Garamond', serif; font-size: 4.5rem; font-weight: 300; color: rgba(172,22,52,0.09); line-height: 1; letter-spacing: -0.03em; }
+.wcard-name { font-family: 'Playfair Display', serif; font-size: 1.18rem; font-weight: 700; color: var(--rustic); line-height: 1.25; margin-bottom: 3px; }
+.wcard-sub { font-size: 0.78rem; color: var(--pearly); margin-bottom: 14px; }
+.wcard-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 13px; }
+.wpill { font-size: 0.69rem; letter-spacing: 0.08em; padding: 4px 12px; border-radius: 20px; font-weight: 500; text-transform: uppercase; }
+.wp-price { background: var(--burgundy); color: #fff; }
+.wp-pts { background: var(--cardinal); color: #fff; }
+.wp-tag { background: var(--petal); color: var(--raspberry); }
+.wcard-desc { font-size: 0.875rem; color: var(--text-mid); line-height: 1.7; font-weight: 300; }
+.empty-st { text-align: center; padding: 54px 24px; color: var(--pearly); }
+.empty-icon { margin-bottom: 12px; }
+.empty-txt { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-style: italic; }
+
+/* ── TASTE CHIPS ── */
+.taste-sub { font-size: 0.96rem; color: var(--text-mid); line-height: 1.78; max-width: 520px; margin-bottom: 10px; font-weight: 300; }
+.chip-note { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.05rem; color: var(--pearly); margin-bottom: 28px; }
+.chips-wrap { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 34px; }
+.chip { padding: 10px 22px; border-radius: 50px; border: 1.5px solid rgba(122,0,43,0.2); background: rgba(255,255,255,0.72); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; color: var(--text-mid); font-weight: 400; transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1); display: flex; align-items: center; gap: 8px; user-select: none; }
+.chip:hover { border-color: var(--cardinal); color: var(--cardinal); transform: scale(1.05); }
+.chip.on { background: var(--cardinal); border-color: var(--cardinal); color: #fff; transform: scale(1.05); }
+.chip-icon { width: 16px; height: 16px; flex-shrink: 0; }
+.t-tag { display: inline-block; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.95rem; color: var(--raspberry); background: var(--petal); padding: 3px 13px; border-radius: 20px; margin: 0 4px; }
+
+/* ── EXPLORER ── */
+.search-row { position: relative; max-width: 500px; margin-bottom: 38px; }
+.search-row input { width: 100%; padding: 14px 52px 14px 22px; border-radius: 50px; border: 1.5px solid rgba(122,0,43,0.18); background: rgba(255,255,255,0.82); font-family: 'DM Sans', sans-serif; font-size: 0.93rem; color: var(--text-dark); outline: none; backdrop-filter: blur(10px); transition: border-color 0.2s, box-shadow 0.2s; }
+.search-row input:focus { border-color: var(--cardinal); box-shadow: 0 0 0 4px rgba(172,22,52,0.09); }
+.search-ico { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.ch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media(max-width:700px){.ch-grid{grid-template-columns:1fr;}}
+.ch-box { padding: 28px; }
+.ch-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--rustic); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+canvas { max-height: 232px; }
+
+/* ── INSIGHTS ── */
+.ins-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+@media(max-width:720px){.ins-grid{grid-template-columns:1fr;}}
+.ins-card { border-radius: 22px; padding: 32px; background: linear-gradient(148deg, var(--tyrian) 0%, var(--rustic) 100%); color: #fff; border: 1.5px solid rgba(255,255,255,0.07); box-shadow: 0 10px 36px rgba(62,0,20,0.22); transition: transform 0.26s; position: relative; overflow: hidden; }
+.ins-card::after { content: ''; position: absolute; top: -44px; right: -44px; width: 130px; height: 130px; border-radius: 50%; background: rgba(186,113,162,0.14); pointer-events: none; }
+.ins-card:hover { transform: translateY(-5px); }
+.ins-ico { margin-bottom: 18px; }
+.ins-q { font-family: 'Cormorant Garamond', serif; font-size: 1.08rem; font-style: italic; color: #f7edf0; line-height: 1.38; margin-bottom: 10px; }
+.ins-big { font-family: 'Playfair Display', serif; font-size: 2.1rem; font-weight: 900; color: var(--rose); margin: 10px 0 6px; letter-spacing: -0.02em; }
+.ins-body { font-size: 0.84rem; color: rgba(247,237,240,0.7); line-height: 1.68; font-weight: 300; }
+
+/* ── FOOTER ── */
+footer { position: relative; z-index: 1; text-align: center; padding: 60px 24px 44px; border-top: 1.5px solid rgba(172,22,52,0.12); }
+.foot-logo { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 900; font-style: italic; color: var(--burgundy); margin-bottom: 12px; letter-spacing: -0.02em; }
+.foot-sub { font-size: 0.78rem; color: var(--pearly); letter-spacing: 0.08em; line-height: 1.85; }
+
+/* spinner */
+.spin { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: rot 0.75s linear infinite; vertical-align: middle; }
+@keyframes rot { to{transform:rotate(360deg);} }
+
+/* reveal */
+.reveal { opacity: 0; transform: translateY(38px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal.vis { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ── FIXED BACKGROUND ── -->
+<div class="bg-fixed dot-grid">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="blob b4"></div>
+
+  <!-- Top-left vine SVG -->
+  <svg class="vine" style="top:0;left:0;width:380px;opacity:0.28" viewBox="0 0 380 500" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#7a002b" stroke-linecap="round">
+      <path stroke-width="2.5" d="M30 500 Q55 390 95 310 Q135 230 110 145 Q88 75 170 22"/>
+      <path stroke-width="1.5" d="M75 480 Q98 375 128 298 Q158 215 138 130"/>
+      <!-- grape cluster top -->
+      <circle cx="114" cy="148" r="21" fill="rgba(122,0,43,0.22)" stroke="none"/>
+      <circle cx="133" cy="162" r="16" fill="rgba(122,0,43,0.18)" stroke="none"/>
+      <circle cx="96" cy="165" r="18" fill="rgba(172,22,52,0.18)" stroke="none"/>
+      <circle cx="148" cy="145" r="14" fill="rgba(186,113,162,0.22)" stroke="none"/>
+      <circle cx="110" cy="180" r="13" fill="rgba(122,0,43,0.16)" stroke="none"/>
+      <circle cx="130" cy="178" r="12" fill="rgba(172,22,52,0.15)" stroke="none"/>
+      <line x1="114" y1="148" x2="133" y2="162" stroke-width="1.2" stroke="rgba(122,0,43,0.4)"/>
+      <line x1="114" y1="148" x2="96" y2="165" stroke-width="1.2" stroke="rgba(122,0,43,0.4)"/>
+      <line x1="114" y1="148" x2="148" y2="145" stroke-width="1.2" stroke="rgba(122,0,43,0.4)"/>
+      <line x1="133" y1="162" x2="110" y2="180" stroke-width="1.2" stroke="rgba(122,0,43,0.4)"/>
+      <line x1="133" y1="162" x2="130" y2="178" stroke-width="1.2" stroke="rgba(122,0,43,0.4)"/>
+      <!-- mid cluster -->
+      <circle cx="86" cy="252" r="19" fill="rgba(172,22,52,0.16)" stroke="none"/>
+      <circle cx="105" cy="265" r="15" fill="rgba(122,0,43,0.15)" stroke="none"/>
+      <circle cx="70" cy="265" r="16" fill="rgba(186,113,162,0.16)" stroke="none"/>
+      <circle cx="92" cy="278" r="13" fill="rgba(122,0,43,0.14)" stroke="none"/>
+      <line x1="86" y1="252" x2="105" y2="265" stroke-width="1" stroke="rgba(122,0,43,0.35)"/>
+      <line x1="86" y1="252" x2="70" y2="265" stroke-width="1" stroke="rgba(122,0,43,0.35)"/>
+      <!-- leaf shapes -->
+      <ellipse cx="155" cy="310" rx="28" ry="18" fill="rgba(172,22,52,0.1)" stroke="rgba(122,0,43,0.2)" stroke-width="1" transform="rotate(-35 155 310)"/>
+      <ellipse cx="75" cy="360" rx="24" ry="16" fill="rgba(186,113,162,0.12)" stroke="rgba(122,0,43,0.18)" stroke-width="1" transform="rotate(25 75 360)"/>
+    </g>
+  </svg>
+
+  <!-- Bottom-right vine SVG -->
+  <svg class="vine" style="bottom:0;right:0;width:340px;opacity:0.24;transform:rotate(180deg)" viewBox="0 0 340 480" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#ac1634" stroke-linecap="round">
+      <path stroke-width="2.5" d="M30 480 Q55 375 90 295 Q128 215 108 130 Q88 68 160 18"/>
+      <path stroke-width="1.5" d="M72 460 Q94 360 124 282 Q154 202 136 118"/>
+      <circle cx="110" cy="134" r="20" fill="rgba(172,22,52,0.2)" stroke="none"/>
+      <circle cx="128" cy="148" r="15" fill="rgba(122,0,43,0.18)" stroke="none"/>
+      <circle cx="92" cy="150" r="17" fill="rgba(186,113,162,0.2)" stroke="none"/>
+      <circle cx="142" cy="132" r="13" fill="rgba(172,22,52,0.18)" stroke="none"/>
+      <circle cx="112" cy="166" r="12" fill="rgba(91,0,44,0.16)" stroke="none"/>
+      <line x1="110" y1="134" x2="128" y2="148" stroke-width="1.2" stroke="rgba(172,22,52,0.38)"/>
+      <line x1="110" y1="134" x2="92" y2="150" stroke-width="1.2" stroke="rgba(172,22,52,0.38)"/>
+      <line x1="110" y1="134" x2="142" y2="132" stroke-width="1.2" stroke="rgba(172,22,52,0.38)"/>
+      <ellipse cx="85" cy="238" rx="26" ry="17" fill="rgba(172,22,52,0.13)" stroke="rgba(172,22,52,0.22)" stroke-width="1" transform="rotate(-28 85 238)"/>
+      <ellipse cx="112" cy="290" rx="22" ry="15" fill="rgba(122,0,43,0.12)" stroke="rgba(122,0,43,0.2)" stroke-width="1" transform="rotate(18 112 290)"/>
+    </g>
+  </svg>
+
+  <!-- Mid-right small accent -->
+  <svg class="vine" style="top:32%;right:-30px;width:180px;opacity:0.18;transform:rotate(20deg)" viewBox="0 0 180 320" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#5b002c" stroke-linecap="round">
+      <path stroke-width="2" d="M90 320 Q72 240 105 178 Q130 128 100 62"/>
+      <circle cx="103" cy="68" r="16" fill="rgba(91,0,44,0.18)" stroke="none"/>
+      <circle cx="118" cy="80" r="12" fill="rgba(91,0,44,0.14)" stroke="none"/>
+      <circle cx="88" cy="82" r="14" fill="rgba(186,113,162,0.15)" stroke="none"/>
+      <line x1="103" y1="68" x2="118" y2="80" stroke-width="1" stroke="rgba(91,0,44,0.32)"/>
+      <line x1="103" y1="68" x2="88" y2="82" stroke-width="1" stroke="rgba(91,0,44,0.32)"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="#" class="logo">
+    <!-- SVG wine glass icon -->
+    <svg class="logo-mark" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 4h16l-4 12a4 4 0 0 1-8 0L8 4z" fill="none" stroke="#7a002b" stroke-width="2" stroke-linejoin="round"/>
+      <line x1="16" y1="20" x2="16" y2="27" stroke="#7a002b" stroke-width="2"/>
+      <line x1="11" y1="27" x2="21" y2="27" stroke="#7a002b" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="16" cy="12" rx="5" ry="3" fill="rgba(172,22,52,0.3)" stroke="none"/>
+    </svg>
+    Wine<em>Scout</em>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#rec">Recommender</a></li>
+    <li><a href="#taste">Palate</a></li>
+    <li><a href="#exp">Explorer</a></li>
+    <li><a href="#ins">Insights</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-pill">
+    <svg width="12" height="12" viewBox="0 0 12 12"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9.5 3,11 3.5,7.5 1,5 4.5,4.5" fill="#ac1634"/></svg>
+    130,000+ wines reviewed
+  </div>
+  <h1 class="hero-title">Your next<br><span class="it">favourite</span><br><span class="ol">bottle.</span></h1>
+  <p class="hero-sub">Tell us your budget, your country, your mood — we will find the wine. No sommelier degree required.</p>
+  <div class="hero-btns">
+    <a href="#rec" class="btn-fill">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7h10M8 3l4 4-4 4" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Find My Wine</span>
+    </a>
+    <a href="#taste" class="btn-outline">
+      <svg width="14" height="14" viewBox="0 0 14 14"><polygon points="7,1 8.5,5 13,5.5 9.5,8.5 10.5,13 7,11 3.5,13 4.5,8.5 1,5.5 5.5,5" fill="none" stroke="#7e2a53" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      By Taste
+    </a>
+  </div>
+  <div class="ticker">
+    <div class="ticker-track">
+      <div class="ti">Pinot Noir<span class="ti-dot"></span></div>
+      <div class="ti">Cabernet Sauvignon<span class="ti-dot"></span></div>
+      <div class="ti">Chardonnay<span class="ti-dot"></span></div>
+      <div class="ti">Riesling<span class="ti-dot"></span></div>
+      <div class="ti">Malbec<span class="ti-dot"></span></div>
+      <div class="ti">Barolo<span class="ti-dot"></span></div>
+      <div class="ti">Sauvignon Blanc<span class="ti-dot"></span></div>
+      <div class="ti">Tempranillo<span class="ti-dot"></span></div>
+      <div class="ti">Syrah<span class="ti-dot"></span></div>
+      <div class="ti">Gruner Veltliner<span class="ti-dot"></span></div>
+      <div class="ti">Pinot Noir<span class="ti-dot"></span></div>
+      <div class="ti">Cabernet Sauvignon<span class="ti-dot"></span></div>
+      <div class="ti">Chardonnay<span class="ti-dot"></span></div>
+      <div class="ti">Riesling<span class="ti-dot"></span></div>
+      <div class="ti">Malbec<span class="ti-dot"></span></div>
+      <div class="ti">Barolo<span class="ti-dot"></span></div>
+      <div class="ti">Sauvignon Blanc<span class="ti-dot"></span></div>
+      <div class="ti">Tempranillo<span class="ti-dot"></span></div>
+      <div class="ti">Syrah<span class="ti-dot"></span></div>
+      <div class="ti">Gruner Veltliner<span class="ti-dot"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── RECOMMENDER ── -->
+<section class="sec" id="rec">
+  <div class="reveal">
+    <p class="eyebrow"><span class="ey-bar"></span> Main Feature <span class="ey-bar"></span></p>
+    <h2 class="sec-h">Wine <em>Recommender</em></h2>
+    <div class="glass rec-inner">
+      <div class="ctrl-grid">
+        <div>
+          <span class="ctrl-lbl">Max Budget</span>
+          <div class="budget-num" id="bNum">$50</div>
+          <input type="range" id="bSlide" min="5" max="500" value="50" oninput="updB(this.value)">
+        </div>
+        <div>
+          <span class="ctrl-lbl">Country</span>
+          <select id="cSel">
+            <option value="">Any Country</option>
+            <option>US</option><option>France</option><option>Italy</option>
+            <option>Spain</option><option>Portugal</option><option>Argentina</option>
+            <option>Chile</option><option>Australia</option><option>Austria</option>
+            <option>Germany</option><option>New Zealand</option><option>South Africa</option>
+          </select>
+        </div>
+        <div>
+          <span class="ctrl-lbl">Variety (optional)</span>
+          <select id="vSel">
+            <option value="">Any Variety</option>
+            <option>Pinot Noir</option><option>Cabernet Sauvignon</option>
+            <option>Chardonnay</option><option>Riesling</option>
+            <option>Sauvignon Blanc</option><option>Merlot</option>
+            <option>Syrah</option><option>Malbec</option>
+            <option>Tempranillo</option><option>Sangiovese</option>
+          </select>
+        </div>
+      </div>
+      <button class="action-btn" onclick="findW()">
+        <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="#fff" stroke-width="1.8" fill="none"/><path d="M11 11l3 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span id="rBt">Find My Top 5 Wines</span>
+      </button>
+      <div id="wOut"></div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"><div class="sep-line"></div><div class="sep-txt">— curated for your palate —</div><div class="sep-line"></div></div>
+
+<!-- ── TASTE PROFILE ── -->
+<section class="sec" id="taste">
+  <div class="reveal">
+    <p class="eyebrow"><span class="ey-bar"></span> By Palate <span class="ey-bar"></span></p>
+    <h2 class="sec-h">Pick your <em>flavours</em></h2>
+    <p class="taste-sub">Choose up to 3 taste notes. We will match wines across price tiers — one that hits your note purely, one that blends it beautifully, one that surprises you.</p>
+    <p class="chip-note" id="cNote">Select 1 to 3 flavours to begin</p>
+    <div class="chips-wrap" id="chips">
+      <!-- chips injected by JS with proper SVG icons -->
+    </div>
+    <button class="action-btn" onclick="findT()" style="max-width:340px">
+      <svg width="16" height="16" viewBox="0 0 16 16"><polygon points="8,1 9.8,5.8 15,6.2 11,9.8 12.4,15 8,12.6 3.6,15 5,9.8 1,6.2 6.2,5.8" fill="#fff"/></svg>
+      <span id="tBt">Match My Palate</span>
+    </button>
+    <div id="tOut"></div>
+  </div>
+</section>
+
+<div class="sep"><div class="sep-line"></div><div class="sep-txt">— explore the data —</div><div class="sep-line"></div></div>
+
+<!-- ── EXPLORER ── -->
+<section class="sec" id="exp">
+  <div class="reveal">
+    <p class="eyebrow"><span class="ey-bar"></span> EDA Explorer <span class="ey-bar"></span></p>
+    <h2 class="sec-h">Explore the <em>data</em></h2>
+    <div class="search-row">
+      <input type="text" id="sInp" placeholder="Search by wine, grape, country, winery..." oninput="doSrch()">
+      <span class="search-ico">
+        <svg width="18" height="18" viewBox="0 0 18 18"><circle cx="8" cy="8" r="5.5" stroke="#ba71a2" stroke-width="1.8" fill="none"/><path d="M13 13l3 3" stroke="#ba71a2" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </span>
+    </div>
+    <div class="ch-grid">
+      <div class="glass ch-box">
+        <p class="ch-title">
+          <svg width="10" height="10" viewBox="0 0 10 10"><rect width="10" height="10" rx="2" fill="#ac1634"/></svg>
+          Top Countries by Avg Rating
+        </p>
+        <canvas id="cChart"></canvas>
+      </div>
+      <div class="glass ch-box">
+        <p class="ch-title">
+          <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#7e2a53"/></svg>
+          Price vs Rating
+        </p>
+        <canvas id="sChart"></canvas>
+      </div>
+      <div class="glass ch-box">
+        <p class="ch-title">
+          <svg width="10" height="10" viewBox="0 0 10 10"><rect width="10" height="10" rx="2" fill="#ba71a2"/></svg>
+          Most Common Varieties
+        </p>
+        <canvas id="vChart"></canvas>
+      </div>
+      <div class="glass ch-box">
+        <p class="ch-title">
+          <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="5" fill="#e77291"/></svg>
+          Avg Price per Country
+        </p>
+        <canvas id="pChart"></canvas>
+      </div>
+    </div>
+    <div id="sOut" style="margin-top:32px"></div>
+  </div>
+</section>
+
+<div class="sep"><div class="sep-line"></div><div class="sep-txt">— what the data says —</div><div class="sep-line"></div></div>
+
+<!-- ── INSIGHTS ── -->
+<section class="sec" id="ins">
+  <div class="reveal">
+    <p class="eyebrow"><span class="ey-bar"></span> What Makes a Good Wine? <span class="ey-bar"></span></p>
+    <h2 class="sec-h">Data <em>Insights</em></h2>
+    <div class="ins-grid">
+      <div class="ins-card">
+        <div class="ins-ico">
+          <svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="12" stroke="#e77291" stroke-width="1.8" fill="none"/><path d="M14 8v8M10 13l4 3 4-3" stroke="#e77291" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <p class="ins-q">Do expensive wines score higher?</p>
+        <div class="ins-big">r = 0.42</div>
+        <p class="ins-body">A mild positive correlation — pricier wines trend higher, but wines under $30 average 88.3 pts. Great value is very real.</p>
+      </div>
+      <div class="ins-card">
+        <div class="ins-ico">
+          <svg width="28" height="28" viewBox="0 0 28 28"><polygon points="14,3 17,10 25,10.5 19,15.5 21,23 14,19 7,23 9,15.5 3,10.5 11,10" stroke="#e77291" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>
+        </div>
+        <p class="ins-q">Which country has the best average rating?</p>
+        <div class="ins-big">Austria</div>
+        <p class="ins-body">Austrian wines average 90.1 pts — edging France (89.7) and Germany (89.8). A spectacular under-the-radar producer.</p>
+      </div>
+      <div class="ins-card">
+        <div class="ins-ico">
+          <svg width="28" height="28" viewBox="0 0 28 28"><path d="M6 22 Q7 14 14 10 Q21 14 22 22" stroke="#e77291" stroke-width="1.8" fill="none"/><circle cx="14" cy="8" r="3" stroke="#e77291" stroke-width="1.8" fill="none"/><path d="M10 22 Q12 18 14 16 Q16 18 18 22" stroke="#e77291" stroke-width="1.4" fill="none"/></svg>
+        </div>
+        <p class="ins-q">Which varieties dominate top scores?</p>
+        <div class="ins-big">Nebbiolo</div>
+        <p class="ins-body">Nebbiolo (Barolo/Barbaresco) averages 90.3 pts. Pinot Noir and Riesling follow. Italy punches above its weight.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="foot-logo">WineScout</div>
+  <p class="foot-sub">Built with 130,000+ wine reviews &middot; Kaggle Wine Reviews Dataset<br>Drink mindfully &middot; Pour generously &middot; Scout curiously</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+/* ── DATA ── */
+const W=[
+  {n:"Rainstorm",w:"Rainstorm",c:"US",v:"Pinot Noir",p:15,pt:87,d:"Bright cherry and raspberry aromas with a smooth finish. Juicy red fruits on the palate with soft tannins."},
+  {n:"Meiomi",w:"Meiomi",c:"US",v:"Pinot Noir",p:20,pt:89,d:"Fruit-forward with strawberry, blackberry, and blueberry — silky smooth with a slightly sweet finish."},
+  {n:"Belle Glos Clark",w:"Belle Glos",c:"US",v:"Pinot Noir",p:55,pt:91,d:"Rich and fruity with dark cherry, raspberry, and a hint of spice. Full-bodied and elegant."},
+  {n:"Stag's Leap Artemis",w:"Stag's Leap",c:"US",v:"Cabernet Sauvignon",p:60,pt:91,d:"Blackcurrant, plum, and oak notes. Structured tannins with a long, spicy finish."},
+  {n:"Jordan",w:"Jordan Winery",c:"US",v:"Cabernet Sauvignon",p:55,pt:91,d:"Elegant with cassis, sage, and toasted oak. Smooth mouthfeel and exceptional balance."},
+  {n:"Gundlach Bundschu",w:"Gundlach Bundschu",c:"US",v:"Cabernet Sauvignon",p:42,pt:90,d:"Earthy and dark — blackberry jam, cedar, and a whiff of tobacco on the finish."},
+  {n:"Domaine Drouhin",w:"Domaine Drouhin",c:"US",v:"Pinot Noir",p:40,pt:92,d:"Earthy cherry, rose petal, and subtle oak. Classic Burgundian style from Oregon."},
+  {n:"Argyle Chardonnay",w:"Argyle",c:"US",v:"Chardonnay",p:25,pt:90,d:"Creamy and citrus-driven with ripe apple, lemon curd, and a toasty, mineral finish."},
+  {n:"Louis Jadot Macon",w:"Louis Jadot",c:"France",v:"Chardonnay",p:15,pt:87,d:"Clean and fresh with apple, pear, and a slight floral note. Crisp acidity throughout."},
+  {n:"Bouchard Beaune",w:"Bouchard",c:"France",v:"Pinot Noir",p:35,pt:90,d:"Silky red fruits, earthy undertones, delicate tannins. Classic Burgundy elegance."},
+  {n:"Chapoutier Bila-Haut",w:"Chapoutier",c:"France",v:"Syrah",p:18,pt:88,d:"Smoky black olive, lavender, and dark plum. Rustic Roussillon character."},
+  {n:"Leoville-Barton",w:"Leoville-Barton",c:"France",v:"Cabernet Sauvignon",p:110,pt:95,d:"Concentrated cassis, cedar, graphite. One of Bordeaux's finest. Needs time to open."},
+  {n:"Leflaive Puligny",w:"Leflaive",c:"France",v:"Chardonnay",p:130,pt:96,d:"Extraordinary mineral precision. Lemon zest, white flowers, chalky complexity."},
+  {n:"Famille Perrin",w:"Famille Perrin",c:"France",v:"Syrah",p:13,pt:86,d:"Easy-drinking with ripe plum, herbs, and a hint of white pepper. Great everyday value."},
+  {n:"Barolo Serralunga",w:"Fontanafredda",c:"Italy",v:"Nebbiolo",p:40,pt:93,d:"Commanding Barolo — tar, roses, dried cherries, and earthy depth. Built to age."},
+  {n:"Ornellaia",w:"Ornellaia",c:"Italy",v:"Cabernet Sauvignon",p:185,pt:97,d:"Legendary Super Tuscan. Cassis, graphite, dark chocolate, and Mediterranean herbs."},
+  {n:"Tignanello",w:"Antinori",c:"Italy",v:"Sangiovese",p:75,pt:94,d:"Cherry, tobacco, spice, and vanilla oak. A benchmark of Italian winemaking."},
+  {n:"Masi Amarone",w:"Masi",c:"Italy",v:"Corvina",p:55,pt:93,d:"Rich and drying — dried figs, dark chocolate, espresso, and leather. Powerful finish."},
+  {n:"Planeta Santa Cecilia",w:"Planeta",c:"Italy",v:"Nero d'Avola",p:30,pt:91,d:"Sicilian sunshine in a glass. Plum, violets, and smooth dark chocolate."},
+  {n:"Vega Sicilia Unico",w:"Vega Sicilia",c:"Spain",v:"Tempranillo",p:250,pt:98,d:"Spain's greatest wine. Cedar, dried fruits, tobacco, extraordinary complexity and balance."},
+  {n:"CVNE Imperial Rioja",w:"CVNE",c:"Spain",v:"Tempranillo",p:28,pt:91,d:"Classic Rioja: cherries, vanilla, leather, and dill. Beautifully integrated oak."},
+  {n:"Muga Reserva",w:"Muga",c:"Spain",v:"Tempranillo",p:22,pt:90,d:"Traditional Rioja with cherry fruit, spice, and a smooth, earthy finish."},
+  {n:"Bodegas Manzanos",w:"Manzanos",c:"Spain",v:"Tempranillo",p:10,pt:87,d:"Juicy red fruit, light tannins, and a smooth, approachable finish. Excellent value."},
+  {n:"Catena Adrianna",w:"Catena",c:"Argentina",v:"Malbec",p:130,pt:97,d:"Violet, blackberry, dark chocolate, and cold-climate freshness. A world-class Malbec."},
+  {n:"Zuccardi Valle de Uco",w:"Zuccardi",c:"Argentina",v:"Malbec",p:35,pt:93,d:"Elegant Malbec with blueberry, violets, mineral grip, and silky tannins."},
+  {n:"Clos de los Siete",w:"Clos de los Siete",c:"Argentina",v:"Malbec",p:22,pt:90,d:"Lush dark fruits, plum, cocoa. Rich and velvety — everything you want from Mendoza."},
+  {n:"Achaval Ferrer Quimera",w:"Achaval Ferrer",c:"Argentina",v:"Malbec",p:40,pt:92,d:"Smoky dark cherry, vanilla, and toasted oak with silky, polished tannins."},
+  {n:"Penfolds Grange",w:"Penfolds",c:"Australia",v:"Syrah",p:400,pt:99,d:"Australia's icon. Dark plum, blackberry, chocolate, cedar, extraordinary complexity."},
+  {n:"d'Arenberg Dead Arm",w:"d'Arenberg",c:"Australia",v:"Syrah",p:50,pt:92,d:"Full-throttle Shiraz — blueberry, licorice, violets, and savory dark spice."},
+  {n:"Yalumba Viognier",w:"Yalumba",c:"Australia",v:"Viognier",p:12,pt:87,d:"Peach, apricot blossom, and spice. Refreshing and aromatic — a beautiful summer sipper."},
+  {n:"Cloudy Bay Sauvignon Blanc",w:"Cloudy Bay",c:"New Zealand",v:"Sauvignon Blanc",p:22,pt:91,d:"The benchmark Marlborough Sauvignon — grapefruit, passionfruit, and fresh-cut grass."},
+  {n:"Greywacke Wild Sauvignon",w:"Greywacke",c:"New Zealand",v:"Sauvignon Blanc",p:28,pt:92,d:"Wild-fermented complexity — honeyed texture, citrus zest, and flinty mineral depth."},
+  {n:"Felton Road Pinot",w:"Felton Road",c:"New Zealand",v:"Pinot Noir",p:55,pt:95,d:"Central Otago at its finest. Dark cherry, earth, and silky, profound structure."},
+  {n:"Egon Muller Riesling",w:"Egon Muller",c:"Germany",v:"Riesling",p:90,pt:97,d:"Legendary Mosel Riesling. Peach, slate, citrus blossom, and electric acidity. Ethereal."},
+  {n:"Dr Loosen Sonnenuhr",w:"Dr. Loosen",c:"Germany",v:"Riesling",p:25,pt:91,d:"Peach, apricot, honeysuckle, and slate minerality. Beautifully balanced sweetness."},
+  {n:"Nikolaihof Riesling",w:"Nikolaihof",c:"Austria",v:"Riesling",p:60,pt:94,d:"Biodynamic Wachau Riesling — citrus, white pepper, and granite. Exceptional depth."},
+  {n:"Gobelsburg Gruner",w:"Gobelsburg",c:"Austria",v:"Gruner Veltliner",p:22,pt:90,d:"White pepper, citrus, and herbs — the quintessential Austrian white. Crisp and lively."},
+  {n:"Quinta do Crasto",w:"Quinta do Crasto",c:"Portugal",v:"Portuguese Red",p:15,pt:89,d:"Dark fruits, chocolate, and earthy Douro character. Exceptional value from Portugal."},
+  {n:"Niepoort Redoma",w:"Niepoort",c:"Portugal",v:"Portuguese Red",p:35,pt:93,d:"Floral, earthy, and complex — old vine character with dark cherry and mineral precision."},
+  {n:"Kanonkop Pinotage",w:"Kanonkop",c:"South Africa",v:"Pinotage",p:30,pt:92,d:"Smoky, plummy, and distinctly South African. Dark fruit, coffee, and a robust finish."},
+  {n:"Meerlust Rubicon",w:"Meerlust",c:"South Africa",v:"Cabernet Sauvignon",p:28,pt:91,d:"Cassis, cedar, and tobacco. South Africa's classic Bordeaux-style blend."},
+  {n:"Don Melchor",w:"Concha y Toro",c:"Chile",v:"Cabernet Sauvignon",p:80,pt:95,d:"Chile's prestige Cabernet. Dark berries, graphite, violet, and seamless tannins."},
+  {n:"Errazuriz Kai",w:"Errazuriz",c:"Chile",v:"Carmenere",p:65,pt:94,d:"Lush and velvety — blueberry, dark chocolate, green pepper, and mocha. Stunning."},
+  {n:"Montes Alpha",w:"Montes",c:"Chile",v:"Cabernet Sauvignon",p:18,pt:89,d:"Blackberry, cassis, and cedar. A reliable and elegant everyday wine."}
+];
+
+/* ── FLAVOR SYSTEM ── */
+const FKW = {
+  fruity:["cherry","raspberry","strawberry","blackberry","blueberry","fruit","plum","peach","apricot","passionfruit","lush","berry","currant"],
+  citrusy:["citrus","lemon","grapefruit","lime","zest","orange","tangerine"],
+  smoky:["smoke","smoky","tobacco","tar","leather","coffee","espresso"],
+  spicy:["spice","spicy","pepper","cinnamon","clove","herbs","herbal","lavender","sage"],
+  oak:["oak","cedar","vanilla","toasty","woody","toast","barrel"],
+  smooth:["smooth","silky","velvety","soft","polished","elegant","supple","round","balance"],
+  earthy:["earth","earthy","mineral","slate","stone","chalk","terroir","rustic"],
+  floral:["floral","flower","rose","violet","jasmine","blossom","petal"],
+  mineral:["mineral","slate","chalk","flinty","granite","stone","crisp"],
+  sweet:["sweet","honey","jam","caramel","rich","fig","dried"]
+};
+
+/* Chip definitions with SVG paths */
+const CHIPS = [
+  {id:"fruity", label:"Fruity", icon:'<path d="M8 2C5 2 2 5 2 8s3 6 6 6 6-3 6-6-3-6-6-6zm0 9c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3z" fill="currentColor"/>'},
+  {id:"citrusy", label:"Citrusy", icon:'<circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 4v8M4 8h8" stroke="currentColor" stroke-width="1.5"/>'},
+  {id:"smoky", label:"Smoky", icon:'<path d="M5 14c0-2 2-2 2-4s-2-2-2-4M9 14c0-2 2-2 2-4s-2-2-2-4M13 14c0-2 2-2 2-4s-2-2-2-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>'},
+  {id:"spicy", label:"Spicy", icon:'<path d="M8 2l1.5 4L14 7l-3.5 3.5L11 15l-3-2-3 2 .5-4.5L2 7l4.5-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>'},
+  {id:"oak", label:"Oaky", icon:'<rect x="3" y="4" width="10" height="8" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><line x1="8" y1="4" x2="8" y2="12" stroke="currentColor" stroke-width="1.3"/>'},
+  {id:"smooth", label:"Smooth", icon:'<path d="M2 10 Q5 4 8 8 Q11 12 14 6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>'},
+  {id:"earthy", label:"Earthy", icon:'<path d="M2 12 Q5 6 8 9 Q11 12 14 8M2 14h12" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round"/>'},
+  {id:"floral", label:"Floral", icon:'<circle cx="8" cy="8" r="2" fill="currentColor"/><circle cx="8" cy="4" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="11.5" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="11.5" cy="10" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="4.5" cy="10" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="4.5" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/>'},
+  {id:"mineral", label:"Mineral", icon:'<polygon points="8,2 14,6 14,12 8,15 2,12 2,6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>'},
+  {id:"sweet", label:"Sweet", icon:'<path d="M4 12 Q4 6 8 4 Q12 6 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><line x1="4" y1="12" x2="12" y2="12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>'}
+];
+
+/* Build chips */
+const chipsWrap = document.getElementById('chips');
+CHIPS.forEach(ch => {
+  const el = document.createElement('div');
+  el.className = 'chip'; el.dataset.f = ch.id;
+  el.innerHTML = `<svg class="chip-icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">${ch.icon}</svg>${ch.label}`;
+  el.onclick = () => togChip(el);
+  chipsWrap.appendChild(el);
+});
+
+/* ── HELPERS ── */
+function score(wine, flavors) {
+  const t = (wine.d + ' ' + wine.v + ' ' + wine.n).toLowerCase();
+  let s = 0;
+  flavors.forEach(f => (FKW[f]||[]).forEach(k => { if(t.includes(k)) s += 2; }));
+  s += (wine.pt - 85) * 0.4;
+  return s;
+}
+
+function updB(v) {
+  document.getElementById('bNum').textContent = '$' + v;
+  const sl = document.getElementById('bSlide');
+  sl.style.setProperty('--pct', ((v - sl.min)/(sl.max - sl.min)*100) + '%');
+}
+updB(50);
+
+function wCard(wine, rank, label) {
+  return `<div class="wcard" style="animation-delay:${(rank-1)*0.09}s">
+    <div class="wcard-rank">${String(rank).padStart(2,'0')}</div>
+    <div class="wcard-name">${wine.n}</div>
+    <div class="wcard-sub">${wine.w}${label ? ' &middot; <em style="color:var(--pearly);font-style:italic">' + label + '</em>' : ''}</div>
+    <div class="wcard-pills">
+      <span class="wpill wp-price">$${wine.p}</span>
+      <span class="wpill wp-pts">${wine.pt} pts</span>
+      <span class="wpill wp-tag">${wine.c}</span>
+      <span class="wpill wp-tag">${wine.v}</span>
+    </div>
+    <p class="wcard-desc">${wine.d}</p>
+  </div>`;
+}
+
+function emptyState(msg) {
+  return `<div class="empty-st">
+    <div class="empty-icon"><svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" stroke="#ba71a2" stroke-width="1.8" fill="none"/><path d="M13 20 Q16 14 20 17 Q24 20 27 14" stroke="#ba71a2" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+    <p class="empty-txt">${msg}</p>
+  </div>`;
+}
+
+/* ── RECOMMENDER ── */
+async function findW() {
+  const b = +document.getElementById('bSlide').value;
+  const c = document.getElementById('cSel').value;
+  const v = document.getElementById('vSel').value;
+  const btn = document.querySelector('#rec .action-btn');
+  const bt = document.getElementById('rBt');
+  const out = document.getElementById('wOut');
+  btn.disabled = true;
+  bt.innerHTML = '<span class="spin"></span> Scouting wines...';
+  await new Promise(r => setTimeout(r, 680));
+  let list = W.filter(x => x.p <= b);
+  if (c) list = list.filter(x => x.c === c);
+  if (v) list = list.filter(x => x.v === v);
+  list.sort((a,b) => (b.pt - a.pt)||(a.p - b.p));
+  btn.disabled = false;
+  bt.textContent = 'Find My Top 5 Wines';
+  if (!list.length) { out.innerHTML = emptyState('No wines match these filters — try a wider budget or different country.'); return; }
+  out.innerHTML = `<div class="wines-grid">${list.slice(0,5).map((w,i)=>wCard(w,i+1)).join('')}</div>`;
+}
+
+/* ── TASTE ── */
+let SF = [];
+function togChip(el) {
+  const f = el.dataset.f;
+  if (el.classList.contains('on')) {
+    el.classList.remove('on'); SF = SF.filter(x => x !== f);
+  } else {
+    if (SF.length >= 3) { flashNote('Max 3 flavours!'); return; }
+    el.classList.add('on'); SF.push(f);
+  }
+  updNote();
+}
+function updNote() {
+  const n = SF.length;
+  const msgs = ['Select 1 to 3 flavours to begin','1 selected — add more or match now','2 selected — add 1 more or match!','3 flavours locked in — ready to match!'];
+  document.getElementById('cNote').textContent = msgs[n];
+}
+function flashNote(msg) {
+  const el = document.getElementById('cNote');
+  const prev = el.textContent;
+  el.textContent = msg; el.style.color = 'var(--cardinal)';
+  setTimeout(() => { el.textContent = prev; el.style.color = ''; }, 2000);
+}
+
+async function findT() {
+  if (!SF.length) { flashNote('Pick at least 1 flavour!'); return; }
+  const btn = document.querySelector('#taste .action-btn');
+  const bt = document.getElementById('tBt');
+  const out = document.getElementById('tOut');
+  btn.disabled = true;
+  bt.innerHTML = '<span class="spin"></span> Reading your palate...';
+  await new Promise(r => setTimeout(r, 750));
+  btn.disabled = false;
+  bt.textContent = 'Match My Palate';
+  const sc = W.map(w=>({...w,sc:score(w,SF)})).filter(w=>w.sc>0).sort((a,b)=>b.sc-a.sc);
+  let picks = [], labels = [];
+  if (SF.length === 1) {
+    const ch = sc.filter(w=>w.p<=20)[0], mi = sc.filter(w=>w.p>20&&w.p<=60&&w.n!==ch?.n)[0], pr = sc.filter(w=>w.p>60&&w.n!==ch?.n&&w.n!==mi?.n)[0];
+    picks = [ch,mi,pr].filter(Boolean); labels = ['Budget gem','Mid-range pick','Premium choice'];
+  } else if (SF.length === 2) {
+    const f1 = W.map(w=>({...w,sc:score(w,[SF[0]])})).sort((a,b)=>b.sc-a.sc).filter(w=>w.sc>0)[0];
+    const f2 = W.map(w=>({...w,sc:score(w,[SF[1]])})).sort((a,b)=>b.sc-a.sc).filter(w=>w.sc>0&&w.n!==f1?.n)[0];
+    const bt2 = sc.find(w=>w.n!==f1?.n&&w.n!==f2?.n);
+    picks = [f1,f2,bt2].filter(Boolean); labels = ['Best for '+SF[0],'Best for '+SF[1],SF[0]+' meets '+SF[1]];
+  } else {
+    picks = [sc[0], sc.filter(w=>w.p<=20&&w.n!==sc[0]?.n)[0], sc.filter(w=>w.p>60&&w.n!==sc[0]?.n)[0]].filter(Boolean);
+    labels = ['Top overall match','Budget pick','Worth the splurge'];
+  }
+  const fStr = SF.map(f=>`<span class="t-tag">${f}</span>`).join(' ');
+  out.innerHTML = `<div style="margin-top:34px">
+    <p style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-style:italic;color:var(--text-mid);margin-bottom:26px">Your palate: ${fStr}</p>
+    <div class="wines-grid">${picks.map((w,i)=>wCard(w,i+1,labels[i])).join('')}</div>
+  </div>`;
+}
+
+/* ── SEARCH ── */
+function doSrch() {
+  const q = document.getElementById('sInp').value.toLowerCase().trim();
+  const out = document.getElementById('sOut');
+  if (!q) { out.innerHTML = ''; return; }
+  const m = W.filter(w=>[w.n,w.d,w.v,w.c,w.w].some(s=>s.toLowerCase().includes(q))).slice(0,6);
+  if (!m.length) { out.innerHTML = emptyState('Nothing found — try another keyword.'); return; }
+  out.innerHTML = `<div class="wines-grid">${m.map((w,i)=>wCard(w,i+1)).join('')}</div>`;
+}
+
+/* ── CHARTS — wine palette only, NO tan/khaki ── */
+document.addEventListener('DOMContentLoaded', () => {
+  /* STRICT wine palette — all 8 stops are wine-family colours */
+  const PAL = ['#7a002b','#ac1634','#ba71a2','#e77291','#7e2a53','#5b002c','#d4537e','#3e0014'];
+  const tickCol = '#6b1a40';
+  const base = { plugins:{legend:{display:false}}, animation:{duration:1500,easing:'easeOutQuart'} };
+
+  /* Country avg rating */
+  const cr = {};
+  W.forEach(w=>{ if(!cr[w.c])cr[w.c]=[]; cr[w.c].push(w.pt); });
+  const cAvg = Object.entries(cr).map(([c,a])=>({c,avg:a.reduce((x,y)=>x+y,0)/a.length})).sort((a,b)=>b.avg-a.avg).slice(0,8);
+  new Chart(document.getElementById('cChart'), {
+    type:'bar',
+    data:{ labels:cAvg.map(x=>x.c), datasets:[{data:cAvg.map(x=>+x.avg.toFixed(1)), backgroundColor:PAL.slice(0,8), borderRadius:10, borderSkipped:false}] },
+    options:{ ...base, scales:{ y:{min:86,max:96,ticks:{color:tickCol,font:{size:11}}}, x:{ticks:{color:tickCol,font:{size:11}}} } }
+  });
+
+  /* Scatter */
+  new Chart(document.getElementById('sChart'), {
+    type:'scatter',
+    data:{ datasets:[{data:W.filter(w=>w.p<250).map(w=>({x:w.p,y:w.pt})), backgroundColor:'rgba(172,22,52,0.55)', pointRadius:7, pointHoverRadius:10}] },
+    options:{ ...base, scales:{ x:{title:{display:true,text:'Price ($)',color:tickCol},ticks:{color:tickCol,font:{size:11}}}, y:{title:{display:true,text:'Points',color:tickCol},ticks:{color:tickCol,font:{size:11}},min:84} } }
+  });
+
+  /* Variety donut */
+  const vc = {};
+  W.forEach(w=>vc[w.v]=(vc[w.v]||0)+1);
+  const tv = Object.entries(vc).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  new Chart(document.getElementById('vChart'), {
+    type:'doughnut',
+    data:{ labels:tv.map(x=>x[0]), datasets:[{data:tv.map(x=>x[1]), backgroundColor:PAL, borderWidth:2, borderColor:'rgba(252,238,243,0.85)'}] },
+    options:{ ...base, plugins:{ legend:{display:true,position:'bottom',labels:{color:tickCol,font:{size:10},padding:8}} }, cutout:'60%' }
+  });
+
+  /* Avg price — use PAL directly, not reversed (avoids light/tan end) */
+  const cp = {};
+  W.forEach(w=>{ if(!cp[w.c])cp[w.c]=[]; cp[w.c].push(w.p); });
+  const pAvg = Object.entries(cp).map(([c,a])=>({c,avg:a.reduce((x,y)=>x+y,0)/a.length})).sort((a,b)=>b.avg-a.avg).slice(0,8);
+  new Chart(document.getElementById('pChart'), {
+    type:'bar',
+    data:{ labels:pAvg.map(x=>x.c), datasets:[{data:pAvg.map(x=>+x.avg.toFixed(0)), backgroundColor:PAL.slice(0,8), borderRadius:10, borderSkipped:false}] },
+    options:{ ...base, scales:{ y:{ticks:{color:tickCol,font:{size:11},callback:v=>'$'+v}}, x:{ticks:{color:tickCol,font:{size:11}}} } }
+  });
+
+  /* Scroll reveal */
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('vis'); obs.unobserve(e.target); } });
+  }, {threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+});
+</script>
+</body>
+</html>
